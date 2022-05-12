@@ -4,64 +4,75 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UserLogin
-{
-    public class LoginValidation
-    {
-        private string username;
-        private string password;
-        private string errorMsg;
-
-        public static string currentUserName { get; private set; }
+namespace UserLogin {
+    public class LoginValidation{
+        private static int MIN_LENGHT = 5;
         public static UserRoles currentUserRole { get; private set; }
+        public static string currentUserName { get; private set; }
         public delegate void ActionOnError(string errorMsg);
-        private ActionOnError error;
 
-        public LoginValidation(string user, string password, ActionOnError error)
+        private string userName;
+        private string password;
+        public string errorMessage;
+        private ActionOnError errorFunc;
+
+        
+        public LoginValidation(string userName, string password, ActionOnError errorFunc)
         {
-            this.username = user;
+            this.userName = userName;
             this.password = password;
-            this.error = error;
+            this.errorFunc = errorFunc;
         }
-        public bool ValidateUserInput(ref User u)
+
+        public bool ValidateUserInput(ref User user)
         {
-      
-            Boolean emptyUsername, emptyPassword, shortUsername = false, shortPassword = false;
-            emptyUsername = username.Equals(String.Empty);
-            emptyPassword = password.Equals(String.Empty);
-            if (this.username.Length < 5) { shortUsername = true; }
-            if (this.password.Length < 5) { shortPassword = true; }
-            if (emptyUsername && emptyPassword)
+            Boolean emptyUserName = this.userName.Equals(String.Empty);
+            if(emptyUserName)
             {
-                Console.WriteLine("Username or password not set!");
-                error(errorMsg);
-                return false;
-            }
-            if (shortUsername || shortPassword)
-            {
-                Console.WriteLine("Username or password shorter than 5 symbols!");
-                error(errorMsg);
-                return false;
-            }
-
-            User newU = new User();
-            newU = UserData.IsUserPassCorrect(username, password);
-
-            if(newU != null)
-            {
-                u = newU;
-                currentUserRole = u.role;
-            }
-            else
-            {
+                this.errorMessage = "Не е посочено потребителско име";
+                this.errorFunc(this.errorMessage);
                 currentUserRole = UserRoles.ANONYMOUS;
-                errorMsg = "Incorrect user!";
-                error(errorMsg);
                 return false;
             }
 
-            currentUserName = this.username;
-            Logger.LogActivity("Successfull Login");
+            Boolean emptyPass = this.password.Equals(String.Empty);
+            if(emptyPass)
+            {
+                this.errorMessage = "Не е посочена парола";
+                this.errorFunc(this.errorMessage);
+                currentUserRole = UserRoles.ANONYMOUS;
+                return false;
+            }
+
+            if(this.userName.Length < MIN_LENGHT)
+            {
+                this.errorMessage = "Потребителското име съдържа по-малко от 5 символа";
+                this.errorFunc(this.errorMessage);
+                currentUserRole = UserRoles.ANONYMOUS;
+                return false;
+            }
+
+            if (this.password.Length < MIN_LENGHT)
+            {
+                this.errorMessage = "Паролата съдържа по-малко от 5 символа";
+                this.errorFunc(this.errorMessage);
+                currentUserRole = UserRoles.ANONYMOUS;
+                return false;
+            }
+
+            user = UserData.IsUserPassCorrect(this.userName, this.password);
+
+            if (user == null)
+            {
+                this.errorMessage = "Не съществува потребител със зададените потребителско име и парола";
+                this.errorFunc(this.errorMessage);
+                currentUserRole = UserRoles.ANONYMOUS;
+                return false;
+            }
+
+            currentUserName = this.userName;
+            currentUserRole = (UserRoles)user.role;
+            Logger.LogActivity("Успешен Login");
             return true;
         }
     }

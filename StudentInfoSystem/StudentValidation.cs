@@ -7,14 +7,28 @@ using UserLogin;
 
 namespace StudentInfoSystem
 {
-    internal class StudentValidation
+    public class StudentValidation
     {
-        public Student getStudentDataByUser(User user)
+        public Student GetStudentByUser(User user)
         {
-            foreach(Student s in StudentData.testStudents)
+            StudentData studentData = new StudentData();
+            if (String.IsNullOrWhiteSpace(user.facNumber) || user == null)
             {
-                if(user.fNum == s.fNum) { return s; }
+                Console.WriteLine("Faculty number is empty or there is no such student with this faculty number");
+                return null;
             }
+
+            IEnumerable<Student> students = studentData.getStudents();
+
+            foreach (Student student in students)
+            {
+                if (student.facultyNumber.Equals(user.facNumber))
+                {
+                    return student;
+                }
+            }
+
+            Console.WriteLine("No such student!");
             return null;
         }
     }

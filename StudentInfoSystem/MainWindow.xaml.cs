@@ -15,85 +15,115 @@ using System.Windows.Shapes;
 
 namespace StudentInfoSystem
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        public Student student;
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private void resetAll()
+        private void clear()
         {
-            foreach (var item in MainGrid.Children)
+            foreach (var item in personData.Children)
             {
                 if (item is TextBox)
                 {
-                    ((TextBox)item).Clear(); 
+                    ((TextBox)item).Clear();
+                }
+            }
+
+            foreach (var item in studentInfo.Children)
+            {
+                if (item is TextBox)
+                {
+                    ((TextBox)item).Clear();
                 }
             }
         }
 
-        private void showStudent(Student s)
+        private void setStudent(Student student)
         {
-            Nametxt.Text = s.name;
-            ForeNametxt.Text = s.forename;
-            SurNametxt.Text = s.surname;
-            Facultytxt.Text = s.faculty;
-            Spectxt.Text = s.specialty;
-            OKStxt.Text = s.degree;
-            Stattxt.Text = s.status;
-            Fnumtxt.Text = s.fNum.ToString();
-            Coursetxt.Text = s.course.ToString();
-            Potoktxt.Text = s.potok.ToString();
-            Grouptxt.Text = s.group.ToString();
+            if (isStudentDataCorrect(student))
+            {
+                enableControls();
+                fillStudentInfo(student);
+            }
+            else
+            {
+                clear();
+                disableControls();
+            }
+
         }
 
-        private void makeInactive()
+        private Boolean isStudentDataCorrect(Student student)
         {
-            foreach (var item in MainGrid.Children)
+            return student != null && !String.IsNullOrWhiteSpace(student.firstName) && !String.IsNullOrWhiteSpace(student.secondName) && !String.IsNullOrWhiteSpace(student.lastName)
+                && !String.IsNullOrWhiteSpace(student.faculty) && !String.IsNullOrWhiteSpace(student.speciality) && !String.IsNullOrWhiteSpace(student.degree)
+                && !String.IsNullOrWhiteSpace(student.status) && !String.IsNullOrWhiteSpace(student.facultyNumber) && student.course != 0
+                && student.stream != 0 && student.group != 0;
+        }
+
+        private void fillStudentInfo(Student student)
+        {
+            this.student = student;
+
+            txtFirstName.Text = this.student.firstName;
+            txtSecondName.Text = this.student.secondName;
+            txtLastName.Text = this.student.lastName;
+            txtFaculty.Text = this.student.faculty;
+            txtSpeciality.Text = this.student.speciality;
+            txtDegree.Text = this.student.degree;
+            txtStatus.Text = this.student.status;
+            txtFacultyNumber.Text = this.student.facultyNumber;
+            txtCourse.Text = Convert.ToString(this.student.course);
+            txtStream.Text = Convert.ToString(this.student.stream);
+            txtGroup.Text = Convert.ToString(this.student.group);
+        }
+
+        private void disableControls()
+        {
+            foreach (Control ctr in MainGrid.Children)
             {
-                if (item is TextBox)
+                if (ctr.Name == "btnUnlock" || ctr.Name == "btnTest")
                 {
-                    ((TextBox)item).IsEnabled = false;
+                    ctr.IsEnabled = true;
+                }
+                else
+                {
+                    ctr.IsEnabled = false;
                 }
             }
         }
 
-        private void makeActive()
+        public void enableControls()
         {
-            foreach (var item in MainGrid.Children)
+            foreach (Control ctr in MainGrid.Children)
             {
-                if (item is TextBox)
-                {
-                    ((TextBox)item).IsEnabled = true;
-                }
+                ctr.IsEnabled = true;
             }
         }
 
-        private void InfoBtn_Click(object sender, RoutedEventArgs e)
+        private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            Student s = StudentData.testStudents[0];
-            showStudent(s);
+            StudentData data = new StudentData();
+            setStudent(data.getStudents().First());
         }
 
-        private void ResetBtn_Click(object sender, RoutedEventArgs e)
+        private void btnTest2_Click(object sender, RoutedEventArgs e)
         {
-            resetAll();
+            setStudent(null);
         }
 
-        private void Disablebtn_Click(object sender, RoutedEventArgs e)
+        private void btnLock_Click(object sender, RoutedEventArgs e)
         {
-            makeInactive();
+            disableControls();
         }
 
-        private void Enablebtn_Click(object sender, RoutedEventArgs e)
+        private void btnUnlock_Click(object sender, RoutedEventArgs e)
         {
-            makeActive();
+            enableControls();
         }
     }
-
-   
 }

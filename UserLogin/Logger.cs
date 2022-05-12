@@ -3,41 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace UserLogin
 {
     public static class Logger
     {
-        static private List<string> currentSessionActivities = new List<string>();
+        private static List<string> currentSessionActivities = new List<string>();
 
-        static public void LogActivity(string activity)
+        public static void LogActivity(string activity)
         {
-            string activityLine = DateTime.Now + "; "
-                                  + LoginValidation.currentUserName + "; "
-                                  + LoginValidation.currentUserRole + "; "
-                                  + activity + Environment.NewLine;
+            StringBuilder sb = new StringBuilder();
+            sb.Append(DateTime.Now + "; ");
+            sb.Append(LoginValidation.currentUserName + "; ");
+            sb.Append(LoginValidation.currentUserRole + "; ");
+            sb.Append(activity).Append(Environment.NewLine);
+
+            string activityLine = sb.ToString();
             currentSessionActivities.Add(activityLine);
-            if (File.Exists("Logger.txt"))
-            {
-                File.AppendAllText("Logger.txt", activityLine);
-            }
-        }
 
-        public static IEnumerable<string> showLog()
-        {
-            List<string> allActivities = new List<string>();
-            if (File.Exists("Logger.txt"))
+            if (File.Exists("Logs.txt"))
             {
-                StreamReader reader = new StreamReader("Logger.txt");
-                string line = reader.ReadLine();
-                while (line != null)
-                {
-                    allActivities.Add(line);
-                    line = reader.ReadLine();
-                }
-                reader.Close();
+                File.AppendAllText("Logs.txt", activityLine);
             }
-            return allActivities;
         }
 
         public static IEnumerable<string> GetCurrentSessionActivities(string filter)
@@ -45,7 +33,26 @@ namespace UserLogin
             List<string> filteredActivities = (from activity in currentSessionActivities
                                                where activity.Contains(filter)
                                                select activity).ToList();
+
             return filteredActivities;
+        }
+
+        public static IEnumerable<string> GetLogsFromFile()
+        {
+            List<string> result = new List<string>();
+
+            StreamReader sr = new StreamReader("Logs.txt");
+            string line = String.Empty;
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                result.Add(line);
+                line = String.Empty;
+            }
+
+            sr.Close();
+
+            return result;
         }
     }
 }

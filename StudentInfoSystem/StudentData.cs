@@ -6,26 +6,32 @@ using System.Threading.Tasks;
 
 namespace StudentInfoSystem
 {
-    internal static class StudentData
+    public class StudentData
     {
-        public static List<Student> testStudents { get; private set; }
+        private List<Student> TestStudents;
 
-        static StudentData()
+        public StudentData()
         {
-            testStudents = new List<Student>();
-            Student student1 = new Student();
-            student1.name = "Иван";
-            student1.forename = "Иванов";
-            student1.surname = "Иванов";
-            student1.faculty = "ФКСТ";
-            student1.specialty = "КСИ";
-            student1.degree = "Бакалавър";
-            student1.status = "Заверил";
-            student1.fNum = 121219777;
-            student1.course = 3;
-            student1.potok = 9;
-            student1.group = 30;
-            testStudents.Add(student1);
+            TestStudents = new List<Student>();
+            TestStudents.Add(exampleStudent());
+        }
+
+        public List<Student> getStudents()
+        {
+            return this.TestStudents;
+        }
+
+        private void setStudents(List<Student> students)
+        {
+            this.TestStudents = students;
+        }
+
+        private Student exampleStudent()
+        {
+            Student student = new Student("Иван", "Петров", "Иванов", "ФКСТ", "КСИ", "Бакалавър", "Заверил",
+                "121219456", 3, 9, 30);
+
+            return student;
         }
     }
 }

@@ -9,92 +9,94 @@ namespace UserLogin
     public static class UserData
     {
         static private List<User> _testUsers;
-        public static List<User> testUsers
+        public static List<User> TestUsers
         {
-            get {
+            get
+            {
                 ResetTestUserData();
-                return _testUsers; 
+                return _testUsers;
             }
-            set {  }
+            set { }
         }
+
         private static void ResetTestUserData()
         {
             if (_testUsers == null)
             {
                 _testUsers = new List<User>();
-                _testUsers.Add(new User());
-                _testUsers[0].Name = "admin";
-                _testUsers[0].Password = "admin";
-                _testUsers[0].fNum = 0;
-                _testUsers[0].role = UserRoles.ADMIN;
-                _testUsers[0].Created = DateTime.Now;
-                _testUsers[0].ValidThru = DateTime.MaxValue;
 
+                User firstUser = new User();
+                firstUser.userName = "qwerty";
+                firstUser.password = "123456";
+                firstUser.facNumber = "121219456";
+                firstUser.role = 4;
+                firstUser.created = DateTime.Now;
+                firstUser.activeUntil = DateTime.MaxValue;
 
-                _testUsers.Add(new User());
-                _testUsers[1].Name = "Student1";
-                _testUsers[1].Password = "Student1";
-                _testUsers[1].fNum = 0;
-                _testUsers[1].role = UserRoles.STUDENT;
-                _testUsers[1].Created = DateTime.Now;
-                _testUsers[1].ValidThru = DateTime.MaxValue;
+                _testUsers.Add(firstUser);
 
+                User secondUser = new User();
+                secondUser.userName = "Second Student";
+                secondUser.password = "Second pass";
+                secondUser.facNumber = "654321";
+                secondUser.role = 4;
+                secondUser.created = DateTime.Now;
+                secondUser.activeUntil = DateTime.MaxValue;
 
-                _testUsers.Add(new User());
-                _testUsers[2].Name = "Student2";
-                _testUsers[2].Password = "Student2";
-                _testUsers[2].fNum = 0;
-                _testUsers[2].role = UserRoles.STUDENT;
-                _testUsers[2].Created = DateTime.Now;
-                _testUsers[2].ValidThru = DateTime.MaxValue;
+                _testUsers.Add(secondUser);
+
+                User adminUser = new User();
+                adminUser.userName = "Admin";
+                adminUser.password = "Admin pass";
+                adminUser.facNumber = "65432198";
+                adminUser.role = 1;
+                adminUser.created = DateTime.Now;
+                adminUser.activeUntil = DateTime.MaxValue;
+
+                _testUsers.Add(adminUser);
             }
         }
 
-        public static User IsUserPassCorrect(string username, string password)
+        public static User IsUserPassCorrect(string userName, string pass)
         {
-            foreach(User u in testUsers)
+            User user = (from u in TestUsers
+                         where u.userName.Equals(userName) && u.password.Equals(pass)
+                         select u).FirstOrDefault();
+
+            return user;
+        }
+
+        public static void SetUserActiveTo(string userName, DateTime newDate)
+        {
+            foreach (User user in TestUsers)
             {
-                if ((username == u.Name) && (password == u.Password))
+                if (user.userName.Equals(userName))
                 {
-                    return u;
+                    user.activeUntil = newDate;
                 }
             }
-            return null;
+
+            Logger.LogActivity("Промяна на активност на " + userName);
         }
 
-        public static void SetUserActiveTo(string username, DateTime activeTo)
+        public static void AssignUserRole(string userName, UserRoles role)
         {
-            foreach(User u in testUsers)
+            foreach (User user in TestUsers)
             {
-                if(username == u.Name)
+                if (user.userName.Equals(userName))
                 {
-                    u.ValidThru = activeTo;
-                    Logger.LogActivity("Промяна на активност на " + username);
+                    user.role = Convert.ToInt32(role);
                 }
             }
+
+            Logger.LogActivity("Промяна на роля на " + userName);
         }
 
-        public static void AssignUserRole(string username, UserRoles ur)
+        public static void seeAllUsers()
         {
-            foreach (User u in testUsers)
+            foreach (User user in _testUsers)
             {
-                if (username == u.Name)
-                {
-                    u.role = ur;
-                    Logger.LogActivity("Промяна на роля на " + username);
-                }
-            }
-        }
-
-        public static void showAllUsers()
-        {
-            foreach(User u in testUsers)
-            {
-                Console.WriteLine("Username: " + u.Name);
-                Console.WriteLine("Faculty number: " + u.fNum);
-                Console.WriteLine("Role: " + u.role);
-                Console.WriteLine("Date created: " + u.Created);
-                Console.WriteLine("Valid thru: " + u.ValidThru);
+                Console.WriteLine(user.userName);
             }
         }
     }

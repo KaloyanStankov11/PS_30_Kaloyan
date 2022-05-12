@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -13,72 +14,93 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Wpfhello
+namespace WPFhello
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
-            Closing += OnClosing;
+            
+            ListBoxItem james = new ListBoxItem();
+            james.Content = "James";
+            peopleListBox.Items.Add(james);
+
+            ListBoxItem david = new ListBoxItem();
+            david.Content = "David";
+            peopleListBox.Items.Add(david);
+
+            peopleListBox.SelectedItem = james;
         }
 
-        private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void btnHello_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show(this, "Are you sure?", "Confirm", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var item in MainGrid.Children)
+            {
+                if (item is TextBox)
+                {
+                    string name = ((TextBox)item).Text;
+                    if (name.Length >= 2)
+                    {
+                        sb.Append("Здрасти ")
+                            .Append(name)
+                            .Append(Environment.NewLine)
+                            .Append("Това е твоята първа програма на Visual Studio 2022!")
+                            .Append(Environment.NewLine);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Въведеното име е много кратко!\nВъведете име с поне два символа!");
+                    }
+                }
+            }
+            MessageBox.Show(sb.ToString());
+        }
+
+        private void btnResult_Click(object sender, RoutedEventArgs e)
+        {
+            int number, result;
+
+            number = Convert.ToInt32(txtNumber.Text);
+
+            result = number;
+            for (int i = result - 1; i > 0; i--)
+            {
+                result *= i;
+            }
+
+            MessageBox.Show(txtNumber.Text + "! e " + result);
+        }
+
+        private void DataWindow_Closing(object sender, CancelEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Сигурни ли сте, че искате да излезете?", "Exit", MessageBoxButton.YesNo);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                e.Cancel = false;
+            } 
+            else
             {
                 e.Cancel = true;
             }
         }
-        private void btnHello_Click(object sender, RoutedEventArgs e)
-        {
-            if (txtName.Text.Length >= 2)
-            {
-                string s = "";
-                foreach (var item in MainGrid.Children)
-                {
-                    if (item is TextBox)
-                    {
-                        s = s + ((TextBox)item).Text;
-                        s = s + '\n';
-                    }
-                }
-                MessageBox.Show("Здрасти " + s + "!!! Това е твоята първа програма на Visual Studio 2012!");
-            }
-            else
-            {
-                MessageBox.Show("Името трябва да е дълго поне 2 символа! Моля коригирайте!");
-            }
-        }
 
-        private void facButton_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
-            int n = int.Parse(facTxt.Text);
-            int fac = 1;
-            if (n < 0)
-            {
-                MessageBox.Show("Некоректна стойност за n");
-            }else if(n==0 || n == 1)
-            {
-                MessageBox.Show(n + "! = 1");
-            }
-            else
-            {
-                for(int i = n; i>1; i--)
-                {
-                    fac *= i;
-                }
-                MessageBox.Show(n + "! = " + fac);
-            }
-        }
+            MyMessage anotherWindow = new MyMessage();
+            anotherWindow.Show();
 
-        private void button1_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("This is Windows Presentation Foundation!");
             textBlock1.Text = DateTime.Now.ToString();
+        }
+
+        private void greetingBtn_Click(object sender, RoutedEventArgs e)
+        {
+            string greetingMsg;
+            greetingMsg = (peopleListBox.SelectedItem as ListBoxItem).Content.ToString();
+            MessageBox.Show("Hi " + greetingMsg);
         }
     }
 }

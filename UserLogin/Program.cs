@@ -1,134 +1,181 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
+using System.Collections.Generic;
 
-namespace UserLogin
-{
-    class Program
-    {
-
-        static UserRoles intToUR(int i)
+namespace UserLogin {
+    class Program {
+        public static void ActionOnError(string errorMsg)
         {
-            switch (i)
-            {
-                case 0:
-                    return UserRoles.ANONYMOUS;
-                case 1:
-                    return UserRoles.ADMIN;
-                case 2:
-                    return UserRoles.INSPECTOR;
-                case 3:
-                    return UserRoles.PROFESSOR;
-                case 4:
-                    return UserRoles.STUDENT;
-                default:
-                    return UserRoles.ANONYMOUS;
-            }
+            Console.WriteLine("!!! " + errorMsg + " !!!");
         }
-        public static bool AdminMenu()
+
+        static LoginDetails PrintLogin(string error = "")
         {
-            
-            Console.WriteLine("Choose option:");
-            Console.WriteLine("0: Exit");
-            Console.WriteLine("1: Change user role");
-            Console.WriteLine("2: Change user active to");
-            Console.WriteLine("3: Users list");
-            Console.WriteLine("4: Show log activity");
-            Console.WriteLine("5: Show current log activity");
-            string name;
-            switch (Console.ReadLine())
+            Console.Clear();
+            int x = Console.WindowWidth / 2;
+            int y = Console.WindowHeight / 2;
+            Console.SetCursorPosition(x - 8, y - 2);
+            Console.WriteLine("Enter Username: ");
+            Console.SetCursorPosition(x - 8, y - 2 + 1);
+            Console.WriteLine("________________");
+
+            Console.SetCursorPosition(x - 8, y - 2 + 2);
+            Console.WriteLine("Enter Password: ");
+            Console.SetCursorPosition(x - 8, y - 2 + 3);
+            Console.WriteLine("________________");
+            if (string.IsNullOrEmpty(error))
             {
-                case "0":
+                Console.SetCursorPosition(x - 8, y - 2 + 1);
+                Console.WriteLine("________________");
+                Console.SetCursorPosition(x - 8, y - 2 + 3);
+                Console.WriteLine("________________");
+                Console.SetCursorPosition(x - 8, y - 2 + 5);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(error);
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            Console.SetCursorPosition(x - 8, y - 2 + 1);
+            string userName = Console.ReadLine();
+            Console.SetCursorPosition(x - 8, y - 2 + 3);
+            string pass = Console.ReadLine();
+
+            LoginDetails details = new LoginDetails(userName, pass);
+            return details;
+        }
+
+        static void Main(string[] args) {
+            var login = PrintLogin("Wrong details");
+            Console.WriteLine();
+
+            LoginValidation validator = new LoginValidation(login.username, login.password, ActionOnError);
+
+            User user = null;
+
+            if (validator.ValidateUserInput(ref user))
+            {
+                Console.WriteLine("Name: " + user.userName);
+                Console.WriteLine("Pass: " + user.password);
+                Console.WriteLine("Fac Num: " + user.facNumber);
+                Console.WriteLine("Role: " + user.role);
+                
+                switch (Convert.ToInt32(LoginValidation.currentUserRole))
+                {
+                    case 0:
+                        Console.WriteLine("Ролята на потребителя е: Анонимен");
+                        break;
+                    case 1:
+                        Console.WriteLine("Ролята на потребителя е: Админ");
+                        
+                        Boolean displayMenu = true;
+                        while (displayMenu)
+                        {
+                            Console.Clear();
+                            displayMenu = displayAdminMenu();
+                        }
+                        
+                        break;
+                    case 2:
+                        Console.WriteLine("Ролята на потребителя е: Инспектор");
+                        break;
+                    case 3:
+                        Console.WriteLine("Ролята на потребителя е: Професор");
+                        break;
+                    case 4:
+                        Console.WriteLine("Ролята на потребителя е: Студент");
+                        break;
+                }
+            }
+            Console.ReadKey();
+        }
+
+        private static Boolean displayAdminMenu()
+        {
+            string userName;
+            int x = Console.WindowWidth / 2;
+            int y = Console.WindowHeight / 2;
+            Console.SetCursorPosition(x - 18, y-5);
+            Console.WriteLine("Меню ___");
+            Console.SetCursorPosition(x - 18, y - 5 + 1);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("0: Изход");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.SetCursorPosition(x - 18, y - 5 + 2);
+            Console.WriteLine("1: Промяна на роля на потребител");
+            Console.SetCursorPosition(x - 18, y - 5 + 3);
+            Console.WriteLine("2: Промяна на активност на потребител");
+            Console.SetCursorPosition(x - 18, y - 5 + 4);
+            Console.WriteLine("3: Списък на потребителите");
+            Console.SetCursorPosition(x - 18, y - 5 + 5);
+            Console.WriteLine("4: Преглед на лог на активност");
+            Console.SetCursorPosition(x - 18, y - 5 + 6);
+            Console.WriteLine("5: Преглед на текуща активност");
+            Console.SetCursorPosition(x - 18, y - 5 + 8);
+            Console.Write("Изберете опция: ");
+            var option = Console.ReadLine();
+            switch (option)
+            {
+                
+                case "0" :
                     return false;
                 case "1":
-                    Console.WriteLine("Enter username: ");
-                    name = Console.ReadLine();
-                    Console.WriteLine("Enter new role");
-                    int ur = int.Parse(Console.ReadLine());
-                    UserRoles newRole = intToUR(ur);
-                    UserData.AssignUserRole(name, newRole);
+                    Console.SetCursorPosition(x - 18 + 6, y - 5);
+                    Console.Write(option);
+                    Console.SetCursorPosition(x - 18, y - 5 + 2);
+                    Console.ForegroundColor= ConsoleColor.Cyan;
+                    Console.WriteLine("1: Промяна на роля на потребител");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ReadKey();
+                    Console.Write("\r\nВъведете потребителско име на потребителя който искате да редактирате: ");
+                    userName = Console.ReadLine();
+
+                    Console.Write("\r\nВъведете новата роля: ");
+                    UserRoles role = (UserRoles)Convert.ToInt32(Console.ReadLine());
+
+                    UserData.AssignUserRole(userName, role);
+
                     return true;
                 case "2":
-                    Console.WriteLine("Enter username: ");
-                    name = Console.ReadLine();
-                    Console.WriteLine("Enter new date:");
-                    DateTime dt = DateTime.Parse(Console.ReadLine());
-                    UserData.SetUserActiveTo(name, dt);
+                    Console.Write("\r\nВъведете потребителско име на потребителя който искате да редактирате: ");
+                    userName = Console.ReadLine();
+
+                    Console.Write("\r\nВъведете новата дата: ");
+                    DateTime date = Convert.ToDateTime(Console.ReadLine());
+
+                    UserData.SetUserActiveTo(userName, date);
+
                     return true;
                 case "3":
-                    UserData.showAllUsers();
+                    UserData.seeAllUsers();
                     return true;
                 case "4":
-                    IEnumerable<string> log = Logger.showLog();
-                    foreach(string logItem in log)
-                    {
-                        Console.WriteLine(logItem);
-                    }
-                    return true;
-                case "5":
-                    Console.WriteLine("Enter filter: ");
-                    string filter = Console.ReadLine();
-                    IEnumerable<string> current = Logger.GetCurrentSessionActivities(filter);
+                    IEnumerable<string> logs = Logger.GetLogsFromFile();
                     StringBuilder sb = new StringBuilder();
-                    foreach (string activity in current)
+
+                    foreach(string log in logs)
                     {
-                        sb.Append(activity);
+                        sb.Append(log).Append(Environment.NewLine);
                     }
+                    
                     Console.WriteLine(sb.ToString());
                     return true;
-                default:
-                    Console.WriteLine("Invalid input!");
-                    return true;
-            }
-        }
-        static void errorAction(string err)
-        {
-            Console.WriteLine("!!!"+err+"!!!");
-        }
-        static void Main(string[] args)
-        {
-            User user = null;
-            //List<User> users = new List<User>();
-            //users = UserData.testUsers;
-            Console.WriteLine("Enter username: ");
-            string username = Console.ReadLine();
-            Console.WriteLine("Enter password: ");
-            string password = Console.ReadLine();
-            LoginValidation validation = new LoginValidation(username, password, errorAction);
-            if (validation.ValidateUserInput(ref user))
-            {
-                Console.WriteLine(user.Name);
-                Console.WriteLine(user.Password);
-                Console.WriteLine(user.fNum);
-                Console.WriteLine(user.role);
-            }
+                case "5":
+                    Console.Write("\nВеведете филтър: ");
+                    string filter = Console.ReadLine();
+                    
+                    StringBuilder builder = new StringBuilder();
+                    IEnumerable<string> currentActs = Logger.GetCurrentSessionActivities(filter);
 
-            switch (LoginValidation.currentUserRole)
-            {
-                case UserRoles.STUDENT: 
-                    Console.WriteLine("Student");
-                    break;
-                case UserRoles.PROFESSOR:
-                    Console.WriteLine("Professor");
-                    break;
-                case UserRoles.ADMIN:
-                    Console.WriteLine("Admin");
-                    Boolean displayMenu = true;
-                    while (displayMenu)
+                    foreach (string message in currentActs)
                     {
-                        displayMenu = AdminMenu();
+                        builder.Append(message).Append(Environment.NewLine);
                     }
-                    break;
-                case UserRoles.INSPECTOR:
-                    Console.WriteLine("Inspector");
-                    break;
-                default: 
-                    Console.WriteLine("Anonymous");
-                    break;
+
+                    Console.Write(builder.ToString());
+                    return true;
+                default:
+                    return true;
             }
         }
     }
 }
+
